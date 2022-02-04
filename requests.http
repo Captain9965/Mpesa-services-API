@@ -1,0 +1,26 @@
+@host=eab2-102-166-210-117.ngrok.io
+
+
+
+# @name ping_server
+POST http://{{host}}/stk/
+Host:{{host}}
+Content-Type: application/json
+
+{
+    "phone": "0792066199",
+    "amount": "1"
+}
+###
+
+# @name test_callback_url
+
+POST https://{{host}}/stk/callback
+Host:{{host}}
+Content-Type: application/json
+
+{
+    "phone": "0792066199",
+    "amount": "1"
+}
+###
