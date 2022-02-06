@@ -1,15 +1,17 @@
-@host=eab2-102-166-210-117.ngrok.io
+@host=e3ad-105-163-45-146.ngrok.io 
 
 
 
-# @name ping_server
+# @name test_stk_endpoint
 POST http://{{host}}/stk/
 Host:{{host}}
 Content-Type: application/json
 
 {
     "phone": "0792066199",
-    "amount": "1"
+    "amount": "1",
+    "shortcode": "174379",
+    "AccountReference": "Boots Kenya"
 }
 ###
 
