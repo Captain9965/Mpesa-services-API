@@ -1,8 +1,8 @@
-@host=e3ad-105-163-45-146.ngrok.io 
+@host=e8e2-197-156-137-133.ngrok.io
 
+//test_stk_endpoint
 
-
-# @name test_stk_endpoint
+###
 POST http://{{host}}/stk/
 Host:{{host}}
 Content-Type: application/json
@@ -11,11 +11,12 @@ Content-Type: application/json
     "phone": "0792066199",
     "amount": "1",
     "shortcode": "174379",
-    "AccountReference": "Boots Kenya"
+    "AccountReference": "Boots Kenya",
+    "ApplicationId": "0001"
 }
 ###
 
-# @name test_callback_url
+//test_callback_url
 
 POST https://{{host}}/stk/callback
 Host:{{host}}
@@ -24,5 +25,24 @@ Content-Type: application/json
 {
     "phone": "0792066199",
     "amount": "1"
+}
+###
+
+//get all transactions:
+
+GET http://{{host}}/stk/fetchAllTransactions 
+Host:{{host}}
+
+###
+
+//test_callback_url
+
+POST http://{{host}}/stk/checkStatus
+Host:{{host}}
+Content-Type: application/json
+
+{
+    "CheckoutRequestID": "ws_CO_020320220739058841",
+    "shortcode": "174379"
 }
 ###
