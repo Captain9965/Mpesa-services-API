@@ -179,11 +179,37 @@ def callbackResponse():
 @stkBp.route("/fetchAllTransactions", methods = ["GET"])
 def fetchAllTransactions():
     t = RequestDump.query.all()
+    if not t:
+        return jsonify(
+            "No transactions found"
+        ), 404
     transactions = [data.serialize for data in t]
     return jsonify(transactions), 200
 
+        
 
-""" Check the status of the request from Safaricom """
+
+"""
+delete all transactions in DB
+
+@todo: Add an endpoint to delete specific transactions based on checkoutRequestID
+use method delete?
+""" 
+@stkBp.route("/deleteAllTransactions", methods = ["GET"])
+def deleteAllTransactions():
+    t= RequestDump.query.all()
+    if not t:
+         return jsonify(
+            "No transactions found"
+        ), 404
+    for field in t:   
+        db.session.delete(field)
+    db.session.commit()
+    return jsonify(
+        "All transactions deleted successfully"
+    ), 200
+
+""" Check the status of the request from Safaricom and reconcile transaction"""
 @stkBp.route("/checkStatus", methods = ["POST"])
 def checkTransactionStatus():
     request_data = request.get_json()

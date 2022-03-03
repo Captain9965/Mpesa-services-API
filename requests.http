@@ -1,4 +1,4 @@
-@host=e8e2-197-156-137-133.ngrok.io
+@host=992b-102-166-146-10.ngrok.io
 
 //test_stk_endpoint
 
@@ -45,4 +45,12 @@ Content-Type: application/json
     "CheckoutRequestID": "ws_CO_020320220739058841",
     "shortcode": "174379"
 }
+###
+
+
+//delete all transactions:
+
+GET http://{{host}}/stk/deleteAllTransactions 
+Host:{{host}}
+
 ###
