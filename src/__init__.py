@@ -8,7 +8,7 @@ db = SQLAlchemy()
 migrate = Migrate()
 #import the database models:
 from .models import (
-    RequestDump,
+    StkRequestDump,
     ResponseDump
 )
 from .stkPush import stkBp

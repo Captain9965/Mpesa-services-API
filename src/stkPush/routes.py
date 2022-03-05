@@ -5,7 +5,7 @@ import requests
 from requests.auth import HTTPBasicAuth
 import base64
 import pytz
-from src import ResponseDump, RequestDump, db
+from src import ResponseDump, StkRequestDump, db
 import uuid
 
 stkBp = Blueprint("stkPush", "stkBp", url_prefix="/stk")
@@ -99,7 +99,7 @@ def make_request():
             # store the request and the success state False:
             # in addition, store the error message for audit:
             if errorMessage is not None:
-                f = RequestDump(
+                f = StkRequestDump(
                     uuid_=uuid.uuid4(),
                     created_at=time_raw,
                     amount=Amount,
@@ -122,7 +122,7 @@ def make_request():
 
         # return the successful response to the user and store the success response:
         response_dict = json.loads(response.text)
-        s = RequestDump(
+        s = StkRequestDump(
             uuid_=uuid.uuid4(),
             created_at=time_raw,
             amount=Amount,
@@ -157,28 +157,55 @@ def make_request():
 @stkBp.route("/callback", methods=["POST"])
 def callbackResponse():
     callback_response = request.get_json()
-    print(callback_response)
-    print("Now save the response!")
+
+    #get the checkout requestID
+    checkoutRequestID = callback_response.get('Body').get('stkCallback').get('CheckoutRequestID')
+    print(checkoutRequestID)
+
+    #check whether the checkoutRequestID exists:
+    t = StkRequestDump.query.filter_by(checkoutRequestId = checkoutRequestID).first()
+    if t is None:
+        return jsonify("Error, transaction does not exist, please contact admin"), 404
+    t.checkoutRequestId = checkoutRequestID
+
+    #get the merchantRequestID:
+    merchantRequestID = callback_response.get('Body').get('stkCallback').get('MerchantRequestID')
+    t.merchantRequestId = merchantRequestID
+
+    #get the result code and the result code description:
+    resultCode = callback_response.get('Body').get('stkCallback').get('ResultCode')
+    t.serviceStatus = (True if resultCode == 0 else False)
+    resultDesc = callback_response.get('Body').get('stkCallback').get('ResultDesc')
+    t.resultDesc = resultDesc
+    try:
+        mpesaReceiptNumber = callback_response.get('Body').get('stkCallback').get('CallbackMetadata').get('Item')[1].get('Value')
+        if mpesaReceiptNumber:
+            t.mpesaReceiptNumber = mpesaReceiptNumber
+    except Exception as e:
+        #then store the runtime errors??
+        print(e)
+
+    #get the account Balance:
+    try:
+        accountBalance = callback_response.get('Body').get('stkCallback').get('CallbackMetadata').get('Item')[2].get('Value')
+        if accountBalance:
+            t.accountBalance = accountBalance
+    except Exception as e:
+        print(e)
+    #store update time:
     tz_Nairobi = pytz.timezone('Africa/Nairobi')
     time_raw = datetime.now(tz_Nairobi)
-    # store the response:
-    resp = ResponseDump(
-        uuid_=uuid.uuid4(),
-        payload=callback_response,
-        created_at=time_raw,
-        service="STK PUSH"
-    )
+    t.updated_at = time_raw
 
-    db.session.add(resp)
+    # store the response in database:
+    db.session.add(t)
     db.session.commit()
 
-    # send the response to the callback url:
-
-    return jsonify("Response registered!!"), 200
+    return jsonify("Response Acknowledged!"), 200
 
 @stkBp.route("/fetchAllTransactions", methods = ["GET"])
 def fetchAllTransactions():
-    t = RequestDump.query.all()
+    t = StkRequestDump.query.all()
     if not t:
         return jsonify(
             "No transactions found"
@@ -197,7 +224,7 @@ use method delete?
 """ 
 @stkBp.route("/deleteAllTransactions", methods = ["GET"])
 def deleteAllTransactions():
-    t= RequestDump.query.all()
+    t= StkRequestDump.query.all()
     if not t:
          return jsonify(
             "No transactions found"
@@ -209,7 +236,7 @@ def deleteAllTransactions():
         "All transactions deleted successfully"
     ), 200
 
-""" Check the status of the request from Safaricom and reconcile transaction"""
+""" Check the status of the request from Safaricom and reconcile transaction if not reconciled"""
 @stkBp.route("/checkStatus", methods = ["POST"])
 def checkTransactionStatus():
     request_data = request.get_json()
@@ -217,9 +244,23 @@ def checkTransactionStatus():
     #first validate the payload before sending the request:
 
     CheckoutRequestID = request_data.get('CheckoutRequestID')
+    if CheckoutRequestID is None:
+        return jsonify("CheckoutRequestID missing from payload"), 400
     str_short_code = request_data.get('shortcode')
-
+    if str_short_code is None:
+        return jsonify("shortcode missing from payload"), 400
     #calculate the timestamp:
+    t = StkRequestDump.query.filter_by(checkoutRequestId = CheckoutRequestID).first()
+    if t is None:
+        return jsonify("Error, transaction does not exist, please contact admin"), 404
+
+    #Transaction already reconciled:
+    if t.resultDesc != "unreconciled":
+        return jsonify({"Callback Response" :{
+            "MerchantRequestID" : t.merchantRequestId,
+            "CheckoutRequestID" : t.checkoutRequestId,
+            "ResultDesc"      : t.resultDesc
+        }})
     fmt = '%Y%m%d%H%M%S'
     tz_Nairobi = pytz.timezone('Africa/Nairobi')
     time_raw = datetime.now(tz_Nairobi)
@@ -236,7 +277,7 @@ def checkTransactionStatus():
     password = password.decode("ascii")
     password = str(password)
 
-     # get access_token
+    #get access_token
     access_token = get_mpesa_token()
 
     # stk_push request url
@@ -257,9 +298,15 @@ def checkTransactionStatus():
     #response:
     response = requests.post(api_url, json=data, headers=headers)
     jsonResponse = json.loads(response.text)
-    
+
+    #reconcile and store in database:
+    resultCode = jsonResponse.get('ResultCode')
+    t.serviceStatus = (True if resultCode == 0 else False)
+    t.resultDesc = jsonResponse.get('ResultDesc')
+    db.session.add(t)
+    db.session.commit()
     return jsonify({
-        "Response":jsonResponse
+        "Express Safaricom Response":jsonResponse
     }), 200
 
 

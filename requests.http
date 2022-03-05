@@ -22,9 +22,14 @@ POST https://{{host}}/stk/callback
 Host:{{host}}
 Content-Type: application/json
 
-{
-    "phone": "0792066199",
-    "amount": "1"
+{"Body":
+{"stkCallback":
+{"MerchantRequestID": "22691-74557427-1",
+  "CheckoutRequestID": "ws_CO_050320221821477511",
+  "ResultCode": 1032,
+  "ResultDesc": "Request cancelled by user"
+}
+}
 }
 ###
 
@@ -35,15 +40,16 @@ Host:{{host}}
 
 ###
 
-//test_callback_url
+//check transaction status:
 
 POST http://{{host}}/stk/checkStatus
 Host:{{host}}
 Content-Type: application/json
 
 {
-    "CheckoutRequestID": "ws_CO_020320220739058841",
-    "shortcode": "174379"
+    "CheckoutRequestID": "ws_CO_050320222216160967",
+    "shortcode": "174379",
+    "ApplicationId": "0001"
 }
 ###
 
