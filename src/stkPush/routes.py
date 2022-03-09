@@ -242,7 +242,6 @@ def checkTransactionStatus():
     request_data = request.get_json()
 
     #first validate the payload before sending the request:
-
     CheckoutRequestID = request_data.get('CheckoutRequestID')
     if CheckoutRequestID is None:
         return jsonify("CheckoutRequestID missing from payload"), 400
@@ -256,11 +255,19 @@ def checkTransactionStatus():
 
     #Transaction already reconciled:
     if t.resultDesc != "unreconciled":
-        return jsonify({"Callback Response" :{
-            "MerchantRequestID" : t.merchantRequestId,
-            "CheckoutRequestID" : t.checkoutRequestId,
-            "ResultDesc"      : t.resultDesc
-        }})
+        if t.mpesaReceiptNumber is not None:
+            return jsonify({"Callback Response" :{
+                "MerchantRequestID" : t.merchantRequestId,
+                "CheckoutRequestID" : t.checkoutRequestId,
+                "ResultDesc"      : t.resultDesc,
+                "MpesaReceiptNumber":t.mpesaReceiptNumber
+            }})
+        else:
+            return jsonify({"Callback Response" :{
+                "MerchantRequestID" : t.merchantRequestId,
+                "CheckoutRequestID" : t.checkoutRequestId,
+                "ResultDesc"      : t.resultDesc
+            }})
     fmt = '%Y%m%d%H%M%S'
     tz_Nairobi = pytz.timezone('Africa/Nairobi')
     time_raw = datetime.now(tz_Nairobi)
@@ -298,11 +305,14 @@ def checkTransactionStatus():
     #response:
     response = requests.post(api_url, json=data, headers=headers)
     jsonResponse = json.loads(response.text)
-
+    print(jsonResponse)
     #reconcile and store in database:
     resultCode = jsonResponse.get('ResultCode')
     t.serviceStatus = (True if resultCode == 0 else False)
-    t.resultDesc = jsonResponse.get('ResultDesc')
+    if jsonResponse.get('ResultDesc'):
+        t.resultDesc = jsonResponse.get('ResultDesc')
+    if jsonResponse.get('errorMessage'):
+        t.resultDesc = jsonResponse.get('errorMessage')
     db.session.add(t)
     db.session.commit()
     return jsonify({
