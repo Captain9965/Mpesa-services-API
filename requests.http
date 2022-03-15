@@ -47,7 +47,7 @@ Host:{{host}}
 Content-Type: application/json
 
 {
-    "CheckoutRequestID": "ws_CO_090320220711037434",
+    "CheckoutRequestID": "ws_CO_150320220658088983",
     "shortcode": "174379",
     "ApplicationId": "0001"
 }
@@ -59,4 +59,30 @@ Content-Type: application/json
 GET http://{{host}}/stk/deleteAllTransactions 
 Host:{{host}}
 
+###
+
+//test reversals endpoint:
+
+POST http://{{host}}/reversals/
+Host:{{host}}
+Content-Type: application/json
+
+{
+  "TransactionID": "QCF5P0URAN",
+  "shortcode": "174379",
+  "ApplicationId": "0001",
+  "amount": "1"
+}
+###
+
+//test account balance endpoint:
+
+POST http://{{host}}/accBal/
+Host:{{host}}
+Content-Type: application/json
+
+{
+  "shortcode": "174379",
+  "ApplicationId": "0001"
+}
 ###
