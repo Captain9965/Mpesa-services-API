@@ -47,7 +47,7 @@ Host:{{host}}
 Content-Type: application/json
 
 {
-    "CheckoutRequestID": "ws_CO_150320220658088983",
+    "CheckoutRequestID": "ws_CO_050420220802148573",
     "shortcode": "174379",
     "ApplicationId": "0001"
 }
@@ -68,7 +68,7 @@ Host:{{host}}
 Content-Type: application/json
 
 {
-  "TransactionID": "QCF5P0URAN",
+  "TransactionID": "QD53U3S895",
   "shortcode": "174379",
   "ApplicationId": "0001",
   "amount": "1"
