@@ -12,6 +12,8 @@ from .models import (
     ResponseDump
 )
 from .stkPush import stkBp
+from .reversals import reversalsBp
+from .accountBalance import accountBalanceBp
 
 def create_app():
     app = Flask(__name__)
@@ -20,6 +22,8 @@ def create_app():
     app.config.from_object(config("APP_CONFIG"))
     #register blueprints:
     app.register_blueprint(stkBp)
+    app.register_blueprint(reversalsBp)
+    app.register_blueprint(accountBalanceBp)
     with app.app_context():
         #callback to initialize the application:
         db.init_app(app)
