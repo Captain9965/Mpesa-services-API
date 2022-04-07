@@ -47,7 +47,7 @@ Host:{{host}}
 Content-Type: application/json
 
 {
-    "CheckoutRequestID": "ws_CO_050420220802148573",
+    "CheckoutRequestID": "ws_CO_070420220738571907",
     "shortcode": "174379",
     "ApplicationId": "0001"
 }

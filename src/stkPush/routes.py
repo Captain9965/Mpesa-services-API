@@ -174,6 +174,8 @@ def callbackResponse():
 
     #get the result code and the result code description:
     resultCode = callback_response.get('Body').get('stkCallback').get('ResultCode')
+
+    #note that the result code returned is an integer:
     t.serviceStatus = (True if resultCode == 0 else False)
     resultDesc = callback_response.get('Body').get('stkCallback').get('ResultDesc')
     t.resultDesc = resultDesc
@@ -256,18 +258,20 @@ def checkTransactionStatus():
     #Transaction already reconciled:
     if t.resultDesc != "unreconciled":
         if t.mpesaReceiptNumber is not None:
-            return jsonify({"Callback Response" :{
+            return jsonify({"Response" :{
                 "MerchantRequestID" : t.merchantRequestId,
                 "CheckoutRequestID" : t.checkoutRequestId,
                 "ResultDesc"      : t.resultDesc,
-                "MpesaReceiptNumber":t.mpesaReceiptNumber
-            }})
+                "MpesaReceiptNumber":t.mpesaReceiptNumber,
+                "Service status"    :"success" if t.serviceStatus else "fail"
+            }}),200
         else:
-            return jsonify({"Callback Response" :{
+            return jsonify({"Response" :{
                 "MerchantRequestID" : t.merchantRequestId,
                 "CheckoutRequestID" : t.checkoutRequestId,
-                "ResultDesc"      : t.resultDesc
-            }})
+                "ResultDesc"      : t.resultDesc,
+                "Service status"    :"success" if t.serviceStatus else "fail"
+            }}),200
     fmt = '%Y%m%d%H%M%S'
     tz_Nairobi = pytz.timezone('Africa/Nairobi')
     time_raw = datetime.now(tz_Nairobi)
@@ -306,18 +310,23 @@ def checkTransactionStatus():
     response = requests.post(api_url, json=data, headers=headers)
     jsonResponse = json.loads(response.text)
     print(jsonResponse)
+
     #reconcile and store in database:
+    #Note that the result code returned is a string unlike the callback response
     resultCode = jsonResponse.get('ResultCode')
-    t.serviceStatus = (True if resultCode == 0 else False)
+    t.serviceStatus = (True if resultCode == '0' else False)
     if jsonResponse.get('ResultDesc'):
         t.resultDesc = jsonResponse.get('ResultDesc')
     if jsonResponse.get('errorMessage'):
         t.resultDesc = jsonResponse.get('errorMessage')
     db.session.add(t)
     db.session.commit()
-    return jsonify({
-        "Express Safaricom Response":jsonResponse
-    }), 200
+    return jsonify({"Response" :{
+        "MerchantRequestID" : t.merchantRequestId,
+        "CheckoutRequestID" : t.checkoutRequestId,
+        "ResultDesc"      : t.resultDesc,
+        "Service status"    :"success" if t.serviceStatus else "fail"
+    }}),201
 
 
 
