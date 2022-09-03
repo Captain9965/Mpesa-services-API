@@ -15,7 +15,7 @@ class StkRequestDump(db.Model):
     service = db.Column(db.String(50), nullable=False, default="STK PUSH")
     requestStatus = db.Column(db.Boolean, nullable=False, default=False)
     serviceStatus = db.Column(db.Boolean, nullable=False, default=False)
-    checkoutRequestId = db.Column(db.String(30), nullable=True)
+    checkoutRequestId = db.Column(db.String(50), nullable=True)
     merchantRequestId = db.Column(db.String(30), nullable=True)
     mpesaReceiptNumber = db.Column(db.String(30), nullable=True)
     accountBalance = db.Column(db.Integer, nullable=False, default=0)

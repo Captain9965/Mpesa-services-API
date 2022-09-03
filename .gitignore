@@ -1,4 +1,5 @@
 /mpesa_env
+/venv
 .env
 *.pyc
 notes.MD
