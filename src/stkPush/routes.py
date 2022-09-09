@@ -255,8 +255,8 @@ def checkTransactionStatus():
     if t is None:
         return jsonify("Error, transaction does not exist, please contact admin"), 404
 
-    #Transaction already reconciled:
-    if t.resultDesc != "unreconciled":
+    #Transaction already reconciled or fully processed:
+    if t.resultDesc != "unreconciled" and t.resultDesc != "The transaction is being processed":
         if t.mpesaReceiptNumber is not None:
             return jsonify({"Response" :{
                 "MerchantRequestID" : t.merchantRequestId,
