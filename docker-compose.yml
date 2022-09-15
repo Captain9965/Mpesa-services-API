@@ -5,10 +5,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: python manage.py run -h 0.0.0.0
+    command: python3 app.py
     volumes:
-      - ./api
+      - ./api:/api
     ports:
       - 5000:5000
     env_file:
-      - ./.env.dev
+      - ./api/.env
