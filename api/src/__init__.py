@@ -2,10 +2,12 @@ from flask import Flask, session
 from decouple import config
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_cors import CORS
 
 #initialize the database:
 db = SQLAlchemy()
 migrate = Migrate()
+cors = CORS()
 #import the database models:
 from .models import (
     StkRequestDump,
@@ -27,6 +29,7 @@ def create_app():
     with app.app_context():
         #callback to initialize the application:
         db.init_app(app)
+        cors.init_app(app)
         #database migrations:
         migrate.init_app(app, db)
         #create all tables:
