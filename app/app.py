@@ -1,4 +1,5 @@
 from src import create_app
+from decouple import config
 import os
 
 new_app = create_app()
@@ -8,4 +9,4 @@ def home():
 
 if __name__ == "__main__":
     os.environ['AUTHLIB_INSECURE_TRANSPORT'] = '1'
-    new_app.run(host= "0.0.0")
+    new_app.run(host= config('APPLICATION_HOST'))

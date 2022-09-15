@@ -1,14 +1,14 @@
-@host=992b-102-166-146-10.ngrok.io
+@host=localhost:5000
 
 //test_stk_endpoint
 
 ###
-POST http://{{host}}/stk/
+POST https://{{host}}/stk/
 Host:{{host}}
 Content-Type: application/json
 
 {
-    "phone": "0792066199",
+    "phone": "0701577567",
     "amount": "1",
     "shortcode": "174379",
     "AccountReference": "Boots Kenya",
@@ -47,7 +47,7 @@ Host:{{host}}
 Content-Type: application/json
 
 {
-    "CheckoutRequestID": "ws_CO_070420220738571907",
+    "CheckoutRequestID": "ws_CO_09092022161825487792066199",
     "shortcode": "174379",
     "ApplicationId": "0001"
 }
@@ -68,7 +68,7 @@ Host:{{host}}
 Content-Type: application/json
 
 {
-  "TransactionID": "QD53U3S895",
+  "TransactionID": "QI167HYZNU",
   "shortcode": "174379",
   "ApplicationId": "0001",
   "amount": "1"
