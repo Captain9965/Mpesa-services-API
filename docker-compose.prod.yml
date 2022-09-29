@@ -14,19 +14,8 @@ services:
       - 5000
     env_file:
       - ./.env
-    depends_on:
-      - mpesa_db
     restart:
       on-failure
-  mpesa_db:
-    container_name: mpesa_db
-    image: postgres:13-alpine
-    env_file:
-      - ./.db.env
-    ports:
-      - "5433:5432"
-    volumes:
-      - mpesa_pgdata:/var/lib/postgresql/data
   mpesa_nginx:
     container_name: mpesa_nginx
     build:
@@ -37,6 +26,3 @@ services:
       on-failure
     depends_on:
       - api
-
-volumes:
-  mpesa_pgdata:
