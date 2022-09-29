@@ -1,5 +1,6 @@
 from decouple import config
 from flask import Flask, Response, jsonify, request, json, Blueprint
+from flask_cors import cross_origin
 from datetime import datetime
 import requests
 from requests.auth import HTTPBasicAuth
@@ -12,6 +13,7 @@ stkBp = Blueprint("stkPush", "stkBp", url_prefix="/stk")
 
 
 @stkBp.route("/", methods=["POST"])
+@cross_origin()
 def make_request():
     # get the request data payload:
     request_data = request.get_json()
@@ -155,6 +157,7 @@ def make_request():
 """This is the callback url:"""
 
 @stkBp.route("/callback", methods=["POST"])
+@cross_origin()
 def callbackResponse():
     callback_response = request.get_json()
 
@@ -206,6 +209,7 @@ def callbackResponse():
     return jsonify("Response Acknowledged!"), 200
 
 @stkBp.route("/fetchAllTransactions", methods = ["GET"])
+@cross_origin()
 def fetchAllTransactions():
     t = StkRequestDump.query.all()
     if not t:
@@ -225,6 +229,7 @@ delete all transactions in DB
 use method delete?
 """ 
 @stkBp.route("/deleteAllTransactions", methods = ["GET"])
+@cross_origin()
 def deleteAllTransactions():
     t= StkRequestDump.query.all()
     if not t:
@@ -240,6 +245,7 @@ def deleteAllTransactions():
 
 """ Check the status of the request from Safaricom and reconcile transaction if not reconciled"""
 @stkBp.route("/checkStatus", methods = ["POST"])
+@cross_origin()
 def checkTransactionStatus():
     request_data = request.get_json()
 

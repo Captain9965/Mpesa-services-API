@@ -1,7 +1,8 @@
 /mpesa_env
 /venv
-.env
+*.env
 *.pyc
 notes.MD
 http-client.env.json
 .idea
+*.tar

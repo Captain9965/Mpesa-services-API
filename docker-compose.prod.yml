@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  api:
+    container_name: mpesa_api
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    volumes:
+      - ./api:/api
+    command: >
+      sh -c "gunicorn -c servers/gunicorn/config/dev.py"
+    expose:
+      - 5000
+    env_file:
+      - ./.env
+    restart:
+      on-failure
+  mpesa_nginx:
+    container_name: mpesa_nginx
+    build:
+      ./api/servers/nginx
+    ports:
+      - "1340:80"
+    restart:
+      on-failure
+    depends_on:
+      - api
