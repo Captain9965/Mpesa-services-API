@@ -5,17 +5,19 @@ services:
     container_name: mpesa_api
     build:
       context: .
-      dockerfile: Dockerfile
-    command: >
-      sh -c "python manage.py run -h 0.0.0.0"
+      dockerfile: Dockerfile.prod
     volumes:
       - ./api:/api
-    ports:
-      - 5000:5000
+    command: >
+      sh -c "gunicorn -c servers/gunicorn/config/dev.py"
+    expose:
+      - 5000
     env_file:
       - ./.env
     depends_on:
       - mpesa_db
+    restart:
+      on-failure
   mpesa_db:
     container_name: mpesa_db
     image: postgres:13-alpine
@@ -25,6 +27,16 @@ services:
       - "5433:5432"
     volumes:
       - mpesa_pgdata:/var/lib/postgresql/data
+  mpesa_nginx:
+    container_name: mpesa_nginx
+    build:
+      ./api/servers/nginx
+    ports:
+      - "1340:80"
+    restart:
+      on-failure
+    depends_on:
+      - api
 
 volumes:
   mpesa_pgdata:
